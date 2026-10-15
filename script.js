@@ -1,7 +1,25 @@
+const TITLE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789$#@&%!?*';
+setInterval(() => { document.title = Array.from({ length: 5 }, () => TITLE_CHARS[Math.floor(Math.random() * TITLE_CHARS.length)]).join(''); }, 100);
 // H€xV#le
 const API_URL = 'https://script.google.com/macros/s/AKfycbwOZqH-hr55cKfbD5JCnE5jWyOuqjg7kCfOr_vkI6_WO3Zm3eCLQsXAJBuh6eP-_MFR/exec';
 const SESSION_KEY = 'exam_access_key';
 let exams = null;
+let fakeAuth = false;
+const VAULT_KEY = 'hx_vault';
+const WRONG_VAULT = [
+  'You broke into a vault. It was the wrong one. It was always the wrong one.',
+  'The keys you stole open doors that lead back to this room.',
+  'This database was a mirror. You only hacked yourself.',
+  'Every lock you pick here was built to be picked.',
+  'The real vault has no door. Only patience.',
+  'You found keys. Not the right kind.',
+  'Stolen keys remember the hands that took them.',
+  'A thief in an empty house is still a thief.',
+  'The seals do not open for borrowed names.',
+  'You won the game. The game was the lock.'
+];
+const vaultKeys = () => { try { return JSON.parse(sessionStorage.getItem(VAULT_KEY) || '[]'); } catch (e) { return []; } };
+const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
 let names = [];
 let current = 0;
 /* H€xV#le */
@@ -9,7 +27,8 @@ const $ = s => document.querySelector(s);
 const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 // H€xV#le
-const errors = { invalid: 'Invalid access key.', ip: 'This key is already bound to a different IP address.' };
+const errors = { invalid: 'That key opens nothing here.', ip: 'This key already answers to another place.', banned: 'You are no longer welcome here.' };
+const attemptsText = n => n == null ? '' : ' ' + n + (n === 1 ? ' attempt remains.' : ' attempts remain.');
 
 async function getIp() {
   // H€xV#le
@@ -18,22 +37,41 @@ async function getIp() {
 }
 
 async function login(key) {
+  if (vaultKeys().includes(key)) {
+    exams = null;
+    names = [];
+    fakeAuth = true;
+    try { sessionStorage.setItem(SESSION_KEY, key); } catch (e) {}
+    setAuth('yes');
+    return;
+  }
   const ip = await getIp();
   /* H€xV#le */
   const r = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ key, ip }) });
   const res = await r.json();
-  if (!res.ok) throw new Error(res.error || 'unknown');
+  if (!res.ok) { const err = new Error(res.error || 'unknown'); err.left = res.left; err.ip = ip; throw err; }
   names = Array.isArray(res.names) ? res.names : [];
   // H€xV#le
   const cryptoKey = await crypto.subtle.importKey('raw', b64(res.examKey), 'AES-GCM', false, ['decrypt']);
   const dec = new TextDecoder();
   exams = await Promise.all(window.EXAMS_ENC.map(async e => JSON.parse(dec.decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64(e.iv) }, cryptoKey, b64(e.ct))))));
   /* H€xV#le */
+  fakeAuth = false;
   try { sessionStorage.setItem(SESSION_KEY, key); } catch (e) {}
+  setAuth('yes');
+}
+
+const AUTH_TEXT = { no: 'not authorized · speak your key', checking: 'checking your key…', yes: 'authorized · the seals are open' };
+function setAuth(state) {
+  const a = $('#auth-status');
+  a.dataset.state = state;
+  a.querySelector('.auth-text').textContent = AUTH_TEXT[state];
 }
 
 function logout() {
   exams = null;
+  fakeAuth = false;
+  setAuth('no');
   names = [];
   // H€xV#le
   try { sessionStorage.removeItem(SESSION_KEY); } catch (e) {}
@@ -54,6 +92,13 @@ function show(id) {
   window.scrollTo({ top: 0 });
 }
 
+function renderVoid() {
+  const grid = $('#exam-grid');
+  grid.replaceChildren(el('figure', 'void-quote', null));
+  grid.firstChild.append(el('blockquote', null, WRONG_VAULT[Math.floor(Math.random() * WRONG_VAULT.length)]), el('figcaption', null, 'the vault you breached holds nothing real'));
+  show('home');
+}
+
 function renderHome() {
   const grid = $('#exam-grid');
   grid.replaceChildren();
@@ -69,17 +114,9 @@ function renderHome() {
     fill.style.width = (ex.questions.length / max * 100) + '%';
     fill.style.animationDelay = (300 + i * 90) + 'ms';
     bar.append(fill);
-    card.append(el('div', 'num', 'Module 0' + (i + 1)), el('h2', null, 'Module Exam ' + (i + 1)), el('div', 'meta', ex.questions.length + ' questions'), bar, el('span', 'go', '→'));
+    card.append(el('div', 'num', 'Seal 0' + (i + 1)), el('h2', null, 'Chamber ' + ROMAN[i]), el('div', 'meta', ex.questions.length + ' riddles'), bar, el('span', 'go', '→'));
     /* H€xV#le */
     card.addEventListener('animationend', () => { card.classList.add('in'); card.classList.remove('bounce'); });
-    card.addEventListener('pointermove', e => {
-      const r = card.getBoundingClientRect();
-      const x = e.clientX - r.left, y = e.clientY - r.top;
-      card.style.setProperty('--mx', x + 'px'); card.style.setProperty('--my', y + 'px');
-      // H€xV#le
-      if (motion && card.classList.contains('in')) card.style.transform = `perspective(700px) rotateX(${(.5 - y / r.height) * 12}deg) rotateY(${(x / r.width - .5) * 12}deg) translateY(-6px) scale(1.02)`;
-    });
-    card.addEventListener('pointerleave', () => { card.style.transform = ''; });
     card.onclick = () => { location.hash = '#exam/' + (i + 1); };
     grid.append(card);
   });
@@ -91,7 +128,7 @@ function renderExam(n) {
   const ex = exams[n - 1];
   if (!ex) return renderHome();
   current = n;
-  $('#exam-title').textContent = 'Module Exam ' + n;
+  $('#exam-title').textContent = $('#exam-title').dataset.text = 'Chamber ' + ROMAN[n - 1];
   const body = $('#exam-body');
   body.replaceChildren();
   /* H€xV#le */
@@ -99,10 +136,10 @@ function renderExam(n) {
     const box = el('article', 'q');
     box.style.animationDelay = Math.min(idx * 50, 600) + 'ms';
     const head = el('div', 'q-head');
-    head.append(el('span', 'q-num', 'Question ' + q.id));
+    head.append(el('span', 'q-num', 'Riddle ' + q.id));
     // H€xV#le
-    if (q.type === 'matching') head.append(el('span', 'tag', 'Matching'));
-    else if (q.multiple) head.append(el('span', 'tag', 'Multiple answers'));
+    if (q.type === 'matching') head.append(el('span', 'tag', 'Bound pairs'));
+    else if (q.multiple) head.append(el('span', 'tag', 'More than one truth'));
     box.append(head, el('p', 'q-text', q.question));
     if (q.type === 'matching') {
       const pairs = el('div', 'pairs');
@@ -130,6 +167,7 @@ function renderExam(n) {
 }
 
 function route() {
+  if (fakeAuth) return renderVoid();
   if (!exams) return show('login');
   // H€xV#le
   const m = location.hash.match(/^#exam\/(\d+)$/);
@@ -142,7 +180,8 @@ async function attempt(key) {
   const card = $('#login-form');
   /* H€xV#le */
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Verifying…';
+  setAuth('checking');
+  btn.innerHTML = '<span class="spinner"></span>Listening…';
   err.textContent = '';
   try {
     await login(key);
@@ -151,14 +190,17 @@ async function attempt(key) {
   } catch (e) {
     // H€xV#le
     exams = null;
+    fakeAuth = false;
+    setAuth('no');
     try { sessionStorage.removeItem(SESSION_KEY); } catch (x) {}
-    err.textContent = errors[e.message] || 'Sign in failed. Please try again.';
+    err.textContent = (errors[e.message] || 'The door stays shut. Try again.') + attemptsText(e.left);
+    if (e.message === 'banned' && window.hxBan) window.hxBan(e.ip);
     show('login');
     card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
   } finally {
     /* H€xV#le */
     btn.disabled = false;
-    btn.textContent = 'Sign in';
+    btn.textContent = 'Enter';
   }
 }
 
@@ -238,11 +280,6 @@ document.addEventListener('pointerdown', e => {
 });
 // H€xV#le
 if (motion && finePointer) {
-  const glow = $('#cursorGlow');
-  let gx = innerWidth / 2, gy = innerHeight / 2, tx = gx, ty = gy;
-  addEventListener('pointermove', e => { tx = e.clientX; ty = e.clientY; glow.classList.add('on'); }, { passive: true });
-  document.addEventListener('pointerleave', () => glow.classList.remove('on'));
-  (function follow() { gx += (tx - gx) * .12; gy += (ty - gy) * .12; glow.style.transform = `translate(${gx}px,${gy}px)`; requestAnimationFrame(follow); })();
   /* H€xV#le */
   document.querySelectorAll('.btn:not(#login-btn)').forEach(b => {
     b.addEventListener('pointermove', e => { const r = b.getBoundingClientRect(); b.style.transform = `translate(${(e.clientX - r.left - r.width / 2) * .18}px,${(e.clientY - r.top - r.height / 2) * .3}px)`; });
@@ -385,7 +422,16 @@ async function createPng(n) {
   }
 }
 
+const GLYPHS = ['∴', '∵', '†', '‡', '§', '¤', '∅', '◊', '※', 'Ω', '∆', '⊗', '⊕', '≡', '¶', '‰'];
+const WHISPERS = ['signal lost', 'do not look back', 'they are listening', 'seal intact', 'no one is here', 'the gate remembers', 'echo', 'null'];
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const hex = () => '0x' + Math.floor(Math.random() * 0xffff).toString(16).toUpperCase().padStart(4, '0');
+function tickerText() {
+  return Array.from({ length: 36 }, () => { const r = Math.random(); return r < .35 ? hex() : r < .55 ? pick(WHISPERS) : pick(GLYPHS) + pick(GLYPHS) + pick(GLYPHS); }).join('  ·  ') + '  ·  ';
+}
+document.querySelectorAll('.ticker span').forEach(s => { const t = tickerText(); s.textContent = t + t; });
 let saved = null;
 try { saved = sessionStorage.getItem(SESSION_KEY); } catch (e) {}
 // H€xV#le
-saved ? attempt(saved) : show('login');
+window.authReady = saved ? attempt(saved) : Promise.resolve();
+if (!saved) show('login');

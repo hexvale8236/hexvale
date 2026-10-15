@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#050505">
+<title>&#8709;</title>
+<style>
+:root{--bg:#050505;--surface:rgba(16,16,18,.92);--border-strong:rgba(255,255,255,.16);--text:#f2f2f3;--muted:#8d8d94;--accent:#ff2a3d;--accent-2:#a8001a;--accent-3:#ff6370;--glow:0 0 0 1px rgba(255,42,61,.4),0 0 24px rgba(255,42,61,.25),0 0 60px rgba(168,0,26,.2)}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;min-height:100vh;display:grid;place-items:center;padding:16px;color:var(--text);font:16px/1.55 "Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden;-webkit-font-smoothing:antialiased}
+.bg{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;transform:translateZ(0);will-change:transform;contain:strict}
+.bg::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,60,75,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,60,75,.05) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse at center,#000 45%,transparent 90%);animation:gridMove 30s linear infinite}
+.blob{position:absolute;box-sizing:content-box;width:520px;height:520px;margin:-110px;padding:110px;border-radius:50%;background:radial-gradient(circle closest-side,var(--c) 0%,var(--c) 38%,transparent 100%);opacity:.13;animation:float 18s ease-in-out infinite}
+.blob.b1{--c:var(--accent);top:-160px;left:-120px}
+.blob.b2{--c:var(--accent-2);bottom:-200px;right:-140px;animation-delay:-6s;animation-duration:22s}
+.blob.b3{--c:var(--accent-3);top:40%;left:55%;width:340px;height:340px;opacity:.06;animation-delay:-12s;animation-duration:26s}
+.scan{position:absolute;left:0;right:0;height:120px;background:linear-gradient(180deg,transparent,rgba(255,42,61,.03),transparent);animation:scan 9s linear infinite}
+@keyframes scan{from{top:-120px}to{top:100%}}
+@keyframes gridMove{to{background-position:48px 48px,48px 48px}}
+@keyframes float{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(80px,60px) scale(1.1)}66%{transform:translate(-60px,40px) scale(.92)}}
+@keyframes popIn{from{opacity:0;transform:scale(.94) translateY(10px)}to{opacity:1;transform:none}}
+@keyframes gradientText{to{background-position:200% center}}
+.card{will-change:transform;width:100%;max-width:440px;background:var(--surface);border:1px solid var(--border-strong);border-radius:20px;padding:40px 32px 32px;text-align:center;animation:popIn .6s cubic-bezier(.2,.8,.2,1) both}
+.code{margin:0;font-size:84px;line-height:1;font-weight:900;letter-spacing:-.04em;background:linear-gradient(90deg,var(--accent),var(--accent-2),var(--accent-3),var(--accent));background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:gradientText 6s linear infinite}
+h1{margin:14px 0 6px;font-size:24px;font-weight:800;letter-spacing:-.02em}
+p{margin:0 0 26px;color:var(--muted);font-size:14px}
+.btn{display:block;width:100%;padding:13px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;font-size:15px;font-weight:600;text-decoration:none;transition:box-shadow .2s}
+.btn:hover{box-shadow:var(--glow)}
+@media (max-width:560px){.card{padding:32px 22px 26px}.blob{width:320px;height:320px}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important}}
+</style>
+<script>(function(){var v=null,b=null;try{v=localStorage.getItem('hx_term');b=localStorage.getItem('hx_ban')}catch(e){}if(b==='1'||v==='1'||(v===null&&matchMedia('(hover: hover) and (pointer: fine)').matches))document.documentElement.classList.add('term-on')})()</script>
+<style>html.term-on body{visibility:hidden}</style>
+</head>
+<body>
+<div class="bg"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="scan"></div></div>
+<main class="card">
+  <p class="code">404</p>
+  <h1>You have strayed from the path</h1>
+  <p>Whatever you sought was never here, or it faded long ago.</p>
+  <a class="btn" id="home" href="/hexvale/">Return to the gate</a>
+</main>
+<script>
+const TITLE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789$#@&%!?*';
+setInterval(() => { document.title = Array.from({ length: 5 }, () => TITLE_CHARS[Math.floor(Math.random() * TITLE_CHARS.length)]).join(''); }, 100);
+const seg = location.pathname.split('/')[1];
+document.getElementById('home').href = location.hostname.endsWith('github.io') && seg ? '/' + seg + '/' : '/';
+const term = document.createElement('script');
+term.src = document.getElementById('home').getAttribute('href') + 'terminal.js';
+document.body.append(term);
+</script>
+</body>
+</html>

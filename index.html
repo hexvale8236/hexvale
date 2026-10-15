@@ -9,44 +9,62 @@
 <meta name="theme-color" content="#050505">
 <title>$#@&</title>
 <link rel="stylesheet" href="style.css">
+<script>(function(){var v=null,b=null;try{v=localStorage.getItem('hx_term');b=localStorage.getItem('hx_ban')}catch(e){}if(b==='1'||v==='1'||(v===null&&matchMedia('(hover: hover) and (pointer: fine)').matches))document.documentElement.classList.add('term-on')})()</script>
+<style>html.term-on body{visibility:hidden}</style>
 </head>
 <body>
 <!-- H€xV#le -->
-<div class="bg"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="scan"></div><div class="cursor-glow" id="cursorGlow"></div></div>
+<div class="bg"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="scan"></div></div>
 <canvas id="particles" aria-hidden="true"></canvas>
 <section id="login" class="view">
+  <div class="auth" id="auth-status" data-state="no" role="status"><span class="auth-dot"></span><span class="auth-text">not authorized &middot; speak your key</span></div>
   <!-- H€xV#le -->
   <form class="login-card" id="login-form">
     <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
-    <h1 class="gradient">Sign in</h1>
-    <p>Enter your access key to continue.</p>
-    <label for="key">Access key</label>
+    <h1 class="glitch" data-text="Who goes there?">Who goes there?</h1>
+    <p>Only those who carry a key may pass.</p>
+    <label for="key">Your key</label>
     <!-- H€xV#le -->
     <div class="field"><input id="key" type="password" autocomplete="off" spellcheck="false" placeholder="••••••••••••••••••••••••" required></div>
-    <button class="btn primary" type="submit" id="login-btn">Sign in</button>
+    <button class="btn primary" type="submit" id="login-btn">Enter</button>
     <div class="error" id="login-error" role="alert"></div>
   </form>
+  <figure class="riddle" id="riddle">
+    <blockquote>What is hidden is never lost. It only waits for the one who knows where to look.</blockquote>
+    <figcaption>&mdash; H&euro;xV#le</figcaption>
+  </figure>
+  <noscript>
+    <style>#riddle,#auth-status{display:none!important}</style>
+    <style>#login-form{display:none!important}</style>
+    <div class="login-card nojs">
+      <p class="mark gradient">&ldquo;</p>
+      <blockquote>A website without JavaScript is a locked door with the key left outside. Turn it on and step in.</blockquote>
+      <p class="by">&mdash; H&euro;xV#le</p>
+      <p class="hint">The scripts sleep in your browser. Wake them, then knock again.</p>
+    </div>
+  </noscript>
 </section>
 <!-- H€xV#le -->
 <section id="home" class="hidden">
   <div class="wrap">
-    <div class="top"><span style="width:84px"></span><h1 class="gradient">Module Exams</h1><button class="btn" data-logout>Log out</button></div>
-    <p class="subtitle">Select an exam to review questions and correct answers.</p>
+    <div class="top"><span class="sig-dot">&#9673; authorized</span><div class="sig"><h1 class="glitch" data-text="H€xV#le">H€xV#le</h1><span class="caret"></span></div><button class="btn" data-logout>Vanish</button><div class="ticker" aria-hidden="true"><span></span></div></div>
+    <p class="subtitle">Four seals. Behind each one lies what was asked, and what was true.</p>
     <div class="grid" id="exam-grid"></div>
   </div>
 </section>
 <!-- H€xV#le -->
 <section id="exam" class="hidden">
   <div class="wrap">
-    <div class="top"><button class="btn" id="back">← Back</button><h1 id="exam-title" class="gradient"></h1><button class="btn" data-logout>Log out</button></div>
-    <div class="actions"><button class="btn primary" id="png-btn" type="button">Create PNG</button></div>
+    <div class="top"><button class="btn" id="back">&larr; Retreat</button><div class="sig"><h1 id="exam-title" class="glitch"></h1><span class="caret"></span></div><button class="btn" data-logout>Vanish</button><div class="ticker" aria-hidden="true"><span></span></div></div>
+    <div class="actions"><button class="btn primary" id="png-btn" type="button">Capture the truth</button></div>
     <div id="exam-body"></div>
   </div>
 </section>
-<button class="btn" id="toTop" aria-label="Back to top">↑</button>
+<button class="btn" id="toTop" aria-label="Ascend">↑</button>
 <!-- H€xV#le -->
 <script src="data.js"></script>
 <script src="script.js"></script>
+<script src="terminal.js"></script>
 <!-- H€xV#le -->
 </body>
 </html>
